@@ -1,13 +1,10 @@
 #/* $begin seq-all-hcl */
-####################################################################
-#  HCL Description of Control for Single Cycle Y86-64 Processor SEQ   #
-#  Copyright (C) Randal E. Bryant, David R. O'Hallaron, 2010       #
-####################################################################
+#####################################################################
+#  HCL Description of Control for Single Cycle Y86-64 Processor SEQ #
+#  Copyright (C) Randal E. Bryant, David R. O'Hallaron, 2010, 2015  #
+#####################################################################
 
-## Your task is to implement the iaddq instruction
-## The file contains a declaration of the icodes
-## for iaddq (IIADDQ)
-## Your job is to add the rest of the logic to make it work
+## This is the solution for the iaddq problem
 
 ####################################################################
 #    C Include's.  Don't alter these                               #
@@ -25,7 +22,7 @@ quote '  {plusmode=0;return sim_main(argc,argv);}'
 #    Declarations.  Do not change/remove/delete any of these       #
 ####################################################################
 
-##### Symbolic representation of Y86-64 Instruction Codes #############
+##### Symbolic representation of Y86-64 Instruction Codes ##########
 wordsig INOP 	'I_NOP'
 wordsig IHALT	'I_HALT'
 wordsig IRRMOVQ	'I_RRMOVQ'
@@ -41,10 +38,10 @@ wordsig IPOPQ	'I_POPQ'
 # Instruction code for iaddq instruction
 wordsig IIADDQ	'I_IADDQ'
 
-##### Symbolic represenations of Y86-64 function codes                  #####
+##### Symbolic represenations of Y86-64 function codes               #####
 wordsig FNONE    'F_NONE'        # Default function code
 
-##### Symbolic representation of Y86-64 Registers referenced explicitly #####
+##### Symbolic representation of Y86-64 Registers referenced explicitly ##
 wordsig RRSP     'REG_RSP'    	# Stack Pointer
 wordsig RNONE    'REG_NONE'   	# Special value indicating "no register"
 
@@ -106,16 +103,18 @@ word ifun = [
 
 bool instr_valid = icode in 
 	{ INOP, IHALT, IRRMOVQ, IIRMOVQ, IRMMOVQ, IMRMOVQ,
+	       IIADDQ,
 	       IOPQ, IJXX, ICALL, IRET, IPUSHQ, IPOPQ };
 
 # Does fetched instruction require a regid byte?
 bool need_regids =
 	icode in { IRRMOVQ, IOPQ, IPUSHQ, IPOPQ, 
+		     IIADDQ,
 		     IIRMOVQ, IRMMOVQ, IMRMOVQ };
 
 # Does fetched instruction require a constant word?
 bool need_valC =
-	icode in { IIRMOVQ, IRMMOVQ, IMRMOVQ, IJXX, ICALL };
+	icode in { IIRMOVQ, IRMMOVQ, IMRMOVQ, IJXX, ICALL, IIADDQ };
 
 ################ Decode Stage    ###################################
 
@@ -129,6 +128,7 @@ word srcA = [
 ## What register should be used as the B source?
 word srcB = [
 	icode in { IOPQ, IRMMOVQ, IMRMOVQ  } : rB;
+	icode in { IIADDQ  } : rB;	
 	icode in { IPUSHQ, IPOPQ, ICALL, IRET } : RRSP;
 	1 : RNONE;  # Don't need register
 ];
@@ -137,6 +137,7 @@ word srcB = [
 word dstE = [
 	icode in { IRRMOVQ } && Cnd : rB;
 	icode in { IIRMOVQ, IOPQ} : rB;
+	icode in { IIADDQ } : rB;
 	icode in { IPUSHQ, IPOPQ, ICALL, IRET } : RRSP;
 	1 : RNONE;  # Don't write any register
 ];
@@ -153,6 +154,7 @@ word dstM = [
 word aluA = [
 	icode in { IRRMOVQ, IOPQ } : valA;
 	icode in { IIRMOVQ, IRMMOVQ, IMRMOVQ } : valC;
+	icode in { IIADDQ } : valC;
 	icode in { ICALL, IPUSHQ } : -8;
 	icode in { IRET, IPOPQ } : 8;
 	# Other instructions don't need ALU
@@ -162,6 +164,7 @@ word aluA = [
 word aluB = [
 	icode in { IRMMOVQ, IMRMOVQ, IOPQ, ICALL, 
 		      IPUSHQ, IRET, IPOPQ } : valB;
+	icode in { IIADDQ } : valB;
 	icode in { IRRMOVQ, IIRMOVQ } : 0;
 	# Other instructions don't need ALU
 ];
@@ -173,12 +176,12 @@ word alufun = [
 ];
 
 ## Should the condition codes be updated?
-bool set_cc = icode in { IOPQ };
+bool set_cc = icode in { IOPQ, IIADDQ };
 
 ################ Memory Stage    ###################################
 
 ## Set read control signal
-bool mem_read = icode in { IMRMOVQ, IPOPQ, IRET };
+bool mem_read = icode in { IMRMOVQ, IPOPQ, IRET};
 
 ## Set write control signal
 bool mem_write = icode in { IRMMOVQ, IPUSHQ, ICALL };

@@ -1,6 +1,6 @@
 CC=gcc
-CFLAGS=-Wall -O1 -g -fcommon
-LCFLAGS=-O1 -fcommon
+CFLAGS=-Wall -O1 -g
+LCFLAGS=-O1
 LEX = flex
 YACC=bison
 LEXLIB = -lfl
