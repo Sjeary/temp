@@ -1,0 +1,386 @@
+                            | #######################################################################
+                            | # Test for copying block of size 10;
+                            | #######################################################################
+0x000:                      | 	.pos 0
+0x000: 30f49006000000000000 | main:	irmovq Stack, %rsp  	# Set up stack pointer
+                            | 
+                            | 	# Set up arguments for copy function and then invoke it
+0x00a: 30f20a00000000000000 | 	irmovq $10, %rdx		# src and dst have 10 elements
+0x014: 30f6b805000000000000 | 	irmovq dest, %rsi	# dst array
+0x01e: 30f75805000000000000 | 	irmovq src, %rdi	# src array
+0x028: 803b00000000000000   | 	call ncopy		 
+0x031: 80f003000000000000   | 	call check	        # Call checker code
+0x03a: 00                   | 	halt                    # should halt with 0xaaaa in %rax
+0x03b:                      | StartFun:
+                            | # #################################################################
+                            | # ncopy.ys - Copy a src block of len words to dst.
+                            | # Return the number of positive ints (>0) contained in src.
+                            | # 
+                            | # Include your name and ID here.
+                            | # 
+                            | # Describe how and why you modified the baseline code.
+                            | # This code unrolls the main loop by a factor of 12.
+                            | # It finishes by jumping to the appropriate position in a code
+                            | # sequence that copies the possible remaining elements
+                            | # #################################################################
+                            | 
+                            | # Do not modify this portion
+                            | # Function prologue
+                            | # %rdi = src, %rsi = dst, %rdx = len
+0x03b:                      | ncopy:
+                            | 
+                            | # #################################################################
+                            | # You can modify this portion
+                            | 
+0x03b: 30f80100000000000000 | 	irmovq $1, %r8          # Constant 1
+0x045: 6300                 | 	xorq %rax,%rax          # count = 0
+0x047: c0f2f4ffffffffffffff | 	iaddq $-12, %rdx        # lmu = len - 12
+0x051: 720d02000000000000   | 	jl SkipLoop             # If < 0, skip loop
+                            | 
+                            | # Main loop.  Copy 12 elements per iteration
+0x05a:                      | Loop:
+                            | # 	Code block for offset 0
+0x05a: 50a70000000000000000 | 	mrmovq 0(%rdi), %r10    # read val from src+0
+0x064: 40a60000000000000000 | 	rmmovq %r10, 0(%rsi)    # Store val at dst+0
+0x06e: 62aa                 | 	andq %r10, %r10         # Test val
+0x070: 717b00000000000000   | 	jle Npos_m_0            # Skip if <= 0
+0x079: 6080                 | 	addq %r8, %rax          # count++
+0x07b:                      | Npos_m_0:
+                            | # 	Code block for offset 1
+0x07b: 50a70800000000000000 | 	mrmovq 8(%rdi), %r10    # read val from src+1
+0x085: 40a60800000000000000 | 	rmmovq %r10, 8(%rsi)    # Store val at dst+1
+0x08f: 62aa                 | 	andq %r10, %r10         # Test val
+0x091: 719c00000000000000   | 	jle Npos_m_1            # Skip if <= 0
+0x09a: 6080                 | 	addq %r8, %rax          # count++
+0x09c:                      | Npos_m_1:
+                            | # 	Code block for offset 2
+0x09c: 50a71000000000000000 | 	mrmovq 16(%rdi), %r10   # read val from src+2
+0x0a6: 40a61000000000000000 | 	rmmovq %r10, 16(%rsi)   # Store val at dst+2
+0x0b0: 62aa                 | 	andq %r10, %r10         # Test val
+0x0b2: 71bd00000000000000   | 	jle Npos_m_2            # Skip if <= 0
+0x0bb: 6080                 | 	addq %r8, %rax          # count++
+0x0bd:                      | Npos_m_2:
+                            | # 	Code block for offset 3
+0x0bd: 50a71800000000000000 | 	mrmovq 24(%rdi), %r10   # read val from src+3
+0x0c7: 40a61800000000000000 | 	rmmovq %r10, 24(%rsi)   # Store val at dst+3
+0x0d1: 62aa                 | 	andq %r10, %r10         # Test val
+0x0d3: 71de00000000000000   | 	jle Npos_m_3            # Skip if <= 0
+0x0dc: 6080                 | 	addq %r8, %rax          # count++
+0x0de:                      | Npos_m_3:
+                            | # 	Code block for offset 4
+0x0de: 50a72000000000000000 | 	mrmovq 32(%rdi), %r10   # read val from src+4
+0x0e8: 40a62000000000000000 | 	rmmovq %r10, 32(%rsi)   # Store val at dst+4
+0x0f2: 62aa                 | 	andq %r10, %r10         # Test val
+0x0f4: 71ff00000000000000   | 	jle Npos_m_4            # Skip if <= 0
+0x0fd: 6080                 | 	addq %r8, %rax          # count++
+0x0ff:                      | Npos_m_4:
+                            | # 	Code block for offset 5
+0x0ff: 50a72800000000000000 | 	mrmovq 40(%rdi), %r10   # read val from src+5
+0x109: 40a62800000000000000 | 	rmmovq %r10, 40(%rsi)   # Store val at dst+5
+0x113: 62aa                 | 	andq %r10, %r10         # Test val
+0x115: 712001000000000000   | 	jle Npos_m_5            # Skip if <= 0
+0x11e: 6080                 | 	addq %r8, %rax          # count++
+0x120:                      | Npos_m_5:
+                            | # 	Code block for offset 6
+0x120: 50a73000000000000000 | 	mrmovq 48(%rdi), %r10   # read val from src+6
+0x12a: 40a63000000000000000 | 	rmmovq %r10, 48(%rsi)   # Store val at dst+6
+0x134: 62aa                 | 	andq %r10, %r10         # Test val
+0x136: 714101000000000000   | 	jle Npos_m_6            # Skip if <= 0
+0x13f: 6080                 | 	addq %r8, %rax          # count++
+0x141:                      | Npos_m_6:
+                            | # 	Code block for offset 7
+0x141: 50a73800000000000000 | 	mrmovq 56(%rdi), %r10   # read val from src+7
+0x14b: 40a63800000000000000 | 	rmmovq %r10, 56(%rsi)   # Store val at dst+7
+0x155: 62aa                 | 	andq %r10, %r10         # Test val
+0x157: 716201000000000000   | 	jle Npos_m_7            # Skip if <= 0
+0x160: 6080                 | 	addq %r8, %rax          # count++
+0x162:                      | Npos_m_7:
+                            | # 	Code block for offset 8
+0x162: 50a74000000000000000 | 	mrmovq 64(%rdi), %r10   # read val from src+8
+0x16c: 40a64000000000000000 | 	rmmovq %r10, 64(%rsi)   # Store val at dst+8
+0x176: 62aa                 | 	andq %r10, %r10         # Test val
+0x178: 718301000000000000   | 	jle Npos_m_8            # Skip if <= 0
+0x181: 6080                 | 	addq %r8, %rax          # count++
+0x183:                      | Npos_m_8:
+                            | # 	Code block for offset 9
+0x183: 50a74800000000000000 | 	mrmovq 72(%rdi), %r10   # read val from src+9
+0x18d: 40a64800000000000000 | 	rmmovq %r10, 72(%rsi)   # Store val at dst+9
+0x197: 62aa                 | 	andq %r10, %r10         # Test val
+0x199: 71a401000000000000   | 	jle Npos_m_9            # Skip if <= 0
+0x1a2: 6080                 | 	addq %r8, %rax          # count++
+0x1a4:                      | Npos_m_9:
+                            | # 	Code block for offset 10
+0x1a4: 50a75000000000000000 | 	mrmovq 80(%rdi), %r10   # read val from src+10
+0x1ae: 40a65000000000000000 | 	rmmovq %r10, 80(%rsi)   # Store val at dst+10
+0x1b8: 62aa                 | 	andq %r10, %r10         # Test val
+0x1ba: 71c501000000000000   | 	jle Npos_m_10           # Skip if <= 0
+0x1c3: 6080                 | 	addq %r8, %rax          # count++
+0x1c5:                      | Npos_m_10:
+                            | # 	Code block for offset 11
+0x1c5: 50a75800000000000000 | 	mrmovq 88(%rdi), %r10   # read val from src+11
+0x1cf: 40a65800000000000000 | 	rmmovq %r10, 88(%rsi)   # Store val at dst+11
+0x1d9: 62aa                 | 	andq %r10, %r10         # Test val
+0x1db: 71e601000000000000   | 	jle Npos_m_11           # Skip if <= 0
+0x1e4: 6080                 | 	addq %r8, %rax          # count++
+0x1e6:                      | Npos_m_11:
+0x1e6: c0f76000000000000000 | 	iaddq $96, %rdi         # src+=12
+0x1f0: c0f66000000000000000 | 	iaddq $96, %rsi         # dst+=12
+0x1fa: c0f2f4ffffffffffffff | 	iaddq $-12, %rdx        # lmu-=12
+0x204: 755a00000000000000   | 	jge Loop                # if lmu >= 0, goto Loop
+0x20d:                      | SkipLoop:
+                            | # Finish remaining elements
+                            | 
+                            | # Find jump offset at table position lmu (between -u & -1)
+0x20d: 6022                 | 	addq %rdx, %rdx         # 2*lmu
+0x20f: 6022                 | 	addq %rdx, %rdx         # 4*lmu
+0x211: 6022                 | 	addq %rdx, %rdx         # 8*lmu
+0x213: 5022f003000000000000 | 	mrmovq JTab(%rdx), %rdx # Fetch offset
+0x21d: a02f                 | 	pushq %rdx              # Put jump target on stack
+0x21f: 90                   | 	ret                     # Jump to it
+0x220:                      | jstart:                         # Copying code for remaining possible elements
+                            | # Completion code
+0x220:                      | Copied0:
+                            | # 	Code block for offset 10
+0x220: 50a75000000000000000 | 	mrmovq 80(%rdi), %r10   # read val from src+10
+0x22a: 40a65000000000000000 | 	rmmovq %r10, 80(%rsi)   # Store val at dst+10
+0x234: 62aa                 | 	andq %r10, %r10         # Test val
+0x236: 714102000000000000   | 	jle Npos_c_10           # Skip if <= 0
+0x23f: 6080                 | 	addq %r8, %rax          # count++
+0x241:                      | Npos_c_10:
+0x241:                      | Copied1:
+                            | # 	Code block for offset 9
+0x241: 50a74800000000000000 | 	mrmovq 72(%rdi), %r10   # read val from src+9
+0x24b: 40a64800000000000000 | 	rmmovq %r10, 72(%rsi)   # Store val at dst+9
+0x255: 62aa                 | 	andq %r10, %r10         # Test val
+0x257: 716202000000000000   | 	jle Npos_c_9            # Skip if <= 0
+0x260: 6080                 | 	addq %r8, %rax          # count++
+0x262:                      | Npos_c_9:
+0x262:                      | Copied2:
+                            | # 	Code block for offset 8
+0x262: 50a74000000000000000 | 	mrmovq 64(%rdi), %r10   # read val from src+8
+0x26c: 40a64000000000000000 | 	rmmovq %r10, 64(%rsi)   # Store val at dst+8
+0x276: 62aa                 | 	andq %r10, %r10         # Test val
+0x278: 718302000000000000   | 	jle Npos_c_8            # Skip if <= 0
+0x281: 6080                 | 	addq %r8, %rax          # count++
+0x283:                      | Npos_c_8:
+0x283:                      | Copied3:
+                            | # 	Code block for offset 7
+0x283: 50a73800000000000000 | 	mrmovq 56(%rdi), %r10   # read val from src+7
+0x28d: 40a63800000000000000 | 	rmmovq %r10, 56(%rsi)   # Store val at dst+7
+0x297: 62aa                 | 	andq %r10, %r10         # Test val
+0x299: 71a402000000000000   | 	jle Npos_c_7            # Skip if <= 0
+0x2a2: 6080                 | 	addq %r8, %rax          # count++
+0x2a4:                      | Npos_c_7:
+0x2a4:                      | Copied4:
+                            | # 	Code block for offset 6
+0x2a4: 50a73000000000000000 | 	mrmovq 48(%rdi), %r10   # read val from src+6
+0x2ae: 40a63000000000000000 | 	rmmovq %r10, 48(%rsi)   # Store val at dst+6
+0x2b8: 62aa                 | 	andq %r10, %r10         # Test val
+0x2ba: 71c502000000000000   | 	jle Npos_c_6            # Skip if <= 0
+0x2c3: 6080                 | 	addq %r8, %rax          # count++
+0x2c5:                      | Npos_c_6:
+0x2c5:                      | Copied5:
+                            | # 	Code block for offset 5
+0x2c5: 50a72800000000000000 | 	mrmovq 40(%rdi), %r10   # read val from src+5
+0x2cf: 40a62800000000000000 | 	rmmovq %r10, 40(%rsi)   # Store val at dst+5
+0x2d9: 62aa                 | 	andq %r10, %r10         # Test val
+0x2db: 71e602000000000000   | 	jle Npos_c_5            # Skip if <= 0
+0x2e4: 6080                 | 	addq %r8, %rax          # count++
+0x2e6:                      | Npos_c_5:
+0x2e6:                      | Copied6:
+                            | # 	Code block for offset 4
+0x2e6: 50a72000000000000000 | 	mrmovq 32(%rdi), %r10   # read val from src+4
+0x2f0: 40a62000000000000000 | 	rmmovq %r10, 32(%rsi)   # Store val at dst+4
+0x2fa: 62aa                 | 	andq %r10, %r10         # Test val
+0x2fc: 710703000000000000   | 	jle Npos_c_4            # Skip if <= 0
+0x305: 6080                 | 	addq %r8, %rax          # count++
+0x307:                      | Npos_c_4:
+0x307:                      | Copied7:
+                            | # 	Code block for offset 3
+0x307: 50a71800000000000000 | 	mrmovq 24(%rdi), %r10   # read val from src+3
+0x311: 40a61800000000000000 | 	rmmovq %r10, 24(%rsi)   # Store val at dst+3
+0x31b: 62aa                 | 	andq %r10, %r10         # Test val
+0x31d: 712803000000000000   | 	jle Npos_c_3            # Skip if <= 0
+0x326: 6080                 | 	addq %r8, %rax          # count++
+0x328:                      | Npos_c_3:
+0x328:                      | Copied8:
+                            | # 	Code block for offset 2
+0x328: 50a71000000000000000 | 	mrmovq 16(%rdi), %r10   # read val from src+2
+0x332: 40a61000000000000000 | 	rmmovq %r10, 16(%rsi)   # Store val at dst+2
+0x33c: 62aa                 | 	andq %r10, %r10         # Test val
+0x33e: 714903000000000000   | 	jle Npos_c_2            # Skip if <= 0
+0x347: 6080                 | 	addq %r8, %rax          # count++
+0x349:                      | Npos_c_2:
+0x349:                      | Copied9:
+                            | # 	Code block for offset 1
+0x349: 50a70800000000000000 | 	mrmovq 8(%rdi), %r10    # read val from src+1
+0x353: 40a60800000000000000 | 	rmmovq %r10, 8(%rsi)    # Store val at dst+1
+0x35d: 62aa                 | 	andq %r10, %r10         # Test val
+0x35f: 716a03000000000000   | 	jle Npos_c_1            # Skip if <= 0
+0x368: 6080                 | 	addq %r8, %rax          # count++
+0x36a:                      | Npos_c_1:
+0x36a:                      | Copied10:
+                            | # 	Code block for offset 0
+0x36a: 50a70000000000000000 | 	mrmovq 0(%rdi), %r10    # read val from src+0
+0x374: 40a60000000000000000 | 	rmmovq %r10, 0(%rsi)    # Store val at dst+0
+0x37e: 62aa                 | 	andq %r10, %r10         # Test val
+0x380: 718b03000000000000   | 	jle Npos_c_0            # Skip if <= 0
+0x389: 6080                 | 	addq %r8, %rax          # count++
+0x38b:                      | Npos_c_0:
+0x38b:                      | Copied11:
+                            | 
+                            | # #################################################################
+                            | 
+                            | # Do not modify the following section of code
+                            | # Function epilogue
+0x38b:                      | Done:
+0x38b: 90                   | 	ret
+                            | # #################################################################
+                            | # Jump table
+0x390:                      | 	.align 8
+0x390: 8b03000000000000     | 	.quad Copied11
+0x398: 6a03000000000000     | 	.quad Copied10
+0x3a0: 4903000000000000     | 	.quad Copied9
+0x3a8: 2803000000000000     | 	.quad Copied8
+0x3b0: 0703000000000000     | 	.quad Copied7
+0x3b8: e602000000000000     | 	.quad Copied6
+0x3c0: c502000000000000     | 	.quad Copied5
+0x3c8: a402000000000000     | 	.quad Copied4
+0x3d0: 8302000000000000     | 	.quad Copied3
+0x3d8: 6202000000000000     | 	.quad Copied2
+0x3e0: 4102000000000000     | 	.quad Copied1
+0x3e8: 2002000000000000     | 	.quad Copied0
+0x3f0:                      | JTab:                           # This table has negative offsets
+                            | # ##################################################################
+                            | # # Keep the following label at the end of your function
+0x3f0:                      | End:
+0x3f0:                      | EndFun:
+                            | #################################################################### 
+                            | # Epilogue code for the correctness testing driver
+                            | ####################################################################
+                            | 
+                            | # This is the correctness checking code.
+                            | # It checks:
+                            | #   1. %rax has 5.  Set %rax to 0xbbbb if not.
+                            | #   2. The total length of the code is less than or equal to 1000.
+                            | #      Set %rax to 0xcccc if not.
+                            | #   3. The source data was copied to the destination.
+                            | #      Set %rax to 0xdddd if not.
+                            | #   4. The words just before and just after the destination region
+                            | #      were not corrupted.  Set %rax to 0xeeee if not.
+                            | # If all checks pass, then sets %rax to 0xaaaa
+0x3f0:                      | check:
+                            | 	# Return value test
+0x3f0: 30fa0500000000000000 | 	irmovq $5,%r10
+0x3fa: 61a0                 | 	subq %r10,%rax
+0x3fc: 731804000000000000   | 	je checkb
+0x405: 30f0bbbb000000000000 | 	irmovq $0xbbbb,%rax  # Failed test #1
+0x40f: 705605000000000000   | 	jmp cdone
+0x418:                      | checkb:
+                            | 	# Code length check
+0x418: 30f0f003000000000000 | 	irmovq EndFun,%rax
+0x422: 30f23b00000000000000 | 	irmovq StartFun,%rdx
+0x42c: 6120                 | 	subq %rdx,%rax
+0x42e: 30f2e803000000000000 | 	irmovq $1000,%rdx
+0x438: 6102                 | 	subq %rax,%rdx
+0x43a: 755604000000000000   | 	jge checkm
+0x443: 30f0cccc000000000000 | 	irmovq $0xcccc,%rax  # Failed test #2
+0x44d: 705605000000000000   | 	jmp cdone
+0x456:                      | checkm:
+0x456: 30f2b805000000000000 | 	irmovq dest, %rdx # Pointer to next destination location
+0x460: 30f35805000000000000 | 	irmovq src,%rbx   # Pointer to next source location
+0x46a: 30f70a00000000000000 | 	irmovq $10,%rdi  # Count
+0x474: 6277                 | 	andq %rdi,%rdi
+0x476: 73d404000000000000   | 	je checkpre         # Skip check if count = 0
+0x47f:                      | mcloop:
+0x47f: 50020000000000000000 | 	mrmovq (%rdx),%rax
+0x489: 50630000000000000000 | 	mrmovq (%rbx),%rsi
+0x493: 6160                 | 	subq %rsi,%rax
+0x495: 73b104000000000000   | 	je  mok
+0x49e: 30f0dddd000000000000 | 	irmovq $0xdddd,%rax # Failed test #3
+0x4a8: 705605000000000000   | 	jmp cdone
+0x4b1:                      | mok:
+0x4b1: 30f00800000000000000 | 	irmovq $8,%rax
+0x4bb: 6002                 | 	addq %rax,%rdx	  # dest ++
+0x4bd: 6003                 | 	addq %rax,%rbx    # src++
+0x4bf: 30f00100000000000000 | 	irmovq $1,%rax
+0x4c9: 6107                 | 	subq %rax,%rdi    # cnt--
+0x4cb: 767f04000000000000   | 	jg mcloop
+0x4d4:                      | checkpre:
+                            | 	# Check for corruption
+0x4d4: 30f2b005000000000000 | 	irmovq Predest,%rdx
+0x4de: 50020000000000000000 | 	mrmovq (%rdx), %rax  # Get word before destination
+0x4e8: 30f2fadebc0000000000 | 	irmovq $0xbcdefa, %rdx
+0x4f2: 6120                 | 	subq %rdx,%rax
+0x4f4: 731005000000000000   | 	je checkpost
+0x4fd: 30f0eeee000000000000 | 	irmovq $0xeeee,%rax  # Failed test #4
+0x507: 705605000000000000   | 	jmp cdone
+0x510:                      | checkpost:
+                            | 	# Check for corruption
+0x510: 30f20806000000000000 | 	irmovq Postdest,%rdx
+0x51a: 50020000000000000000 | 	mrmovq (%rdx), %rax  # Get word after destination
+0x524: 30f2bcfade0000000000 | 	irmovq $0xdefabc, %rdx
+0x52e: 6120                 | 	subq %rdx,%rax
+0x530: 734c05000000000000   | 	je checkok
+0x539: 30f0eeee000000000000 | 	irmovq $0xeeee,%rax # Failed test #4
+0x543: 705605000000000000   | 	jmp cdone
+0x54c:                      | checkok:
+                            | 	# Successful checks
+0x54c: 30f0aaaa000000000000 | 	irmovq $0xaaaa,%rax
+0x556:                      | cdone:
+0x556: 90                   | 	ret
+                            | 
+                            | ###############################
+                            | # Source and destination blocks 
+                            | ###############################
+0x558:                      | 	.align 8
+0x558:                      | src:
+0x558: 0100000000000000     | 	.quad 1
+0x560: feffffffffffffff     | 	.quad -2
+0x568: 0300000000000000     | 	.quad 3
+0x570: fcffffffffffffff     | 	.quad -4
+0x578: 0500000000000000     | 	.quad 5
+0x580: faffffffffffffff     | 	.quad -6
+0x588: 0700000000000000     | 	.quad 7
+0x590: 0800000000000000     | 	.quad 8
+0x598: f7ffffffffffffff     | 	.quad -9
+0x5a0: f6ffffffffffffff     | 	.quad -10
+0x5a8: fadebc0000000000     | 	.quad 0xbcdefa # This shouldn't get moved
+                            | 
+0x5b0:                      | 	.align 16
+0x5b0:                      | Predest:
+0x5b0: fadebc0000000000     | 	.quad 0xbcdefa
+0x5b8:                      | dest:
+0x5b8: abefcd0000000000     | 	.quad 0xcdefab
+0x5c0: abefcd0000000000     | 	.quad 0xcdefab
+0x5c8: abefcd0000000000     | 	.quad 0xcdefab
+0x5d0: abefcd0000000000     | 	.quad 0xcdefab
+0x5d8: abefcd0000000000     | 	.quad 0xcdefab
+0x5e0: abefcd0000000000     | 	.quad 0xcdefab
+0x5e8: abefcd0000000000     | 	.quad 0xcdefab
+0x5f0: abefcd0000000000     | 	.quad 0xcdefab
+0x5f8: abefcd0000000000     | 	.quad 0xcdefab
+0x600: abefcd0000000000     | 	.quad 0xcdefab
+0x608:                      | Postdest:
+0x608: bcfade0000000000     | 	.quad 0xdefabc
+                            | 
+0x610:                      | .align 8
+                            | # Run time stack
+0x610: 0000000000000000     | 	.quad 0
+0x618: 0000000000000000     | 	.quad 0
+0x620: 0000000000000000     | 	.quad 0
+0x628: 0000000000000000     | 	.quad 0
+0x630: 0000000000000000     | 	.quad 0
+0x638: 0000000000000000     | 	.quad 0
+0x640: 0000000000000000     | 	.quad 0
+0x648: 0000000000000000     | 	.quad 0
+0x650: 0000000000000000     | 	.quad 0
+0x658: 0000000000000000     | 	.quad 0
+0x660: 0000000000000000     | 	.quad 0
+0x668: 0000000000000000     | 	.quad 0
+0x670: 0000000000000000     | 	.quad 0
+0x678: 0000000000000000     | 	.quad 0
+0x680: 0000000000000000     | 	.quad 0
+0x688: 0000000000000000     | 	.quad 0
+                            | 
+0x690:                      | Stack:
